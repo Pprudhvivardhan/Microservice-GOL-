@@ -1,0 +1,36 @@
+---
+- hosts: webservers
+  become: true
+  tasks:
+  - name: Install Java
+    command: yum install java-1.8.0-openjdk -y
+    command: yum install java-1.8.0-openjdk-devel -y
+  - lineinfile:
+     path: /etc/profile
+     line: 'export JRE_HOME=/usr/lib/jvm/jre'
+  - lineinfile:
+     path: /etc/profile
+     line: 'export JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk'
+  - name: ensure a list of packages installed
+    yum:
+     name: "{{ packages }}"
+    vars:
+     packages:
+      - tomcat
+      - tomcat-webapps
+      - tomcat-admin-webapps
+      - tomcat-docs-webapp
+      - tomcat-javadoc
+     state: present
+  - name: Copy fil
+    copy:
+     src: /home/ansible/tomcat-users.xml
+     dest: /usr/share/tomcat/conf/tomcat-users.xml
+  - name: enable service tomcat
+    systemd:
+     name: tomcat
+     enabled: yes
+  - name: start service tomcat
+    systemd:
+     name: tomcat
+     state: started
